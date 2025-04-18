@@ -1,0 +1,24 @@
+# バイナリファイル
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# テスト結果
+*.out
+
+# モジュールキャッシュ
+/vendor/
+*.mod
+*.sum
+
+# 環境変数ファイル
+.env
+
+# IDEやエディタの設定ファイル
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
