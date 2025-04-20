@@ -78,7 +78,7 @@ func main() {
 	mux.HandleFunc("POST /api/memos", createMemo)
 	mux.HandleFunc("GET /api/memos/", getMemo)
 	mux.HandleFunc("PUT /api/memos/", updateMemo)
-	mux.HandleFunc("DELETE /memos/", deleteMemo)
+	mux.HandleFunc("DELETE /api/memos/", deleteMemo)
 
 	log.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))
