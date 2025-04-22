@@ -7,8 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func migrate() {
-	dsn := "user:password@tcp(localhost:3306)/memo_db?parseTime=true"
+func Migrate() {
+	dsn := "user:password@tcp(dev-mysql:3306)/memo_db"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
@@ -30,7 +30,7 @@ func migrate() {
 	}
 }
 
-func drop() {
+func Drop() {
 	dsn := "user:password@tcp(localhost:3306)/memo_db?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

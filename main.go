@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kenta-kenta/gaishi-sserverside/migrations"
 	"log"
 	"net/http"
 	"strings"
@@ -72,6 +73,9 @@ func deleteMemo(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// データベースのマイグレーション
+	migrations.Migrate()
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", hello)
