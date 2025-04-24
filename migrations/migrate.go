@@ -8,7 +8,7 @@ import (
 )
 
 func Migrate() {
-	dsn := "user:password@tcp(dev-mysql:3306)/memo_db"
+	dsn := "user:password@tcp(localhost:3307)/memo_db?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
@@ -19,8 +19,8 @@ func Migrate() {
 	sqlStr := `
 	CREATE TABLE IF NOT EXISTS memos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
+    title VARCHAR(255) NOT content,
+    NULL TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	)`
@@ -31,7 +31,7 @@ func Migrate() {
 }
 
 func Drop() {
-	dsn := "user:password@tcp(localhost:3306)/memo_db?parseTime=true"
+	dsn := "user:password@tcp(localhost:3307)/memo_db?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
