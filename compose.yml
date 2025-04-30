@@ -1,20 +1,19 @@
 version: '3.8'
 services:
-    dev-mysql:
-      image: mysql:latest
-      ports:
-        - "3307:3306"
+    dev-postgres:
+      image: postgres:latest
       environment:
-        MYSQL_HOST: "localhost"
-        MYSQL_USER: "user"
-        MYSQL_PASSWORD: "password"
-        MYSQL_DB: "memo_db"
+        POSTGRES_HOST: ${POSTGRES_HOST}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_PORT: ${POSTGRES_PORT}
       volumes:
-        - mysql_data:/var/lib/mysql/data
+        - postgres_data:/var/lib/postgresql/data
       restart: always
 
 volumes:
-  mysql_data:
+  postgres_data:
     driver: local
 
 
