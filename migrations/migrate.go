@@ -3,21 +3,17 @@ package migrations
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
-
 	_ "github.com/lib/pq"
+	"log"
 )
 
 func Migrate() {
-	dbHost := os.Getenv("DB_HOST")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
+	dbUser := "user"
+	dbPassword := "postgres"
+	dbName := "memo_db"
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPassword, dbName)
+	dsn := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+		dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
@@ -27,11 +23,11 @@ func Migrate() {
 	// テーブルが存在しない場合は作成する
 	sqlStr := `
 	CREATE TABLE IF NOT EXISTS memos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT content,
-    NULL TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+		title      VARCHAR(255) NOT NULL,
+		content    TEXT,
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+		updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	)`
 	_, err = db.Exec(sqlStr)
 	if err != nil {

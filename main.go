@@ -1,12 +1,24 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/kenta-kenta/gaishi-sserverside/migrations"
 	"log"
 	"net/http"
 	"strings"
+
+	_ "github.com/lib/pq" // PostgreSQLの場合
+)
+
+// DB接続情報
+const (
+	dbUser     = "user"
+	dbPassword = "postgres"
+	dbName     = "memo_db"
+
+	dsn = "user=user password=postgres dbname=memo_db sslmode=disable"
 )
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -18,9 +30,30 @@ func createMemo(w http.ResponseWriter, r *http.Request) {
 		Title   string `json:"title"`
 		Content string `json:"content"`
 	}
+	var responseMemo struct {
+		ID        int64  `json:"id"`
+		Title     string `json:"title"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&memo); err != nil {
 		fmt.Fprintf(w, "decode err: %v", err)
 	}
+	// データベースに保存
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		fmt.Fprintf(w, "db open err: %v", err)
+		return
+	}
+	const sqlStr = "INSERT INTO memos(title, content) VALUES ($1, $2)"
+	res, err := db.Exec(sqlStr, memo.Title, memo.Content)
+	if err != nil {
+		fmt.Fprintf(w, "db exec err: %v", err)
+		return
+	}
+	responseMemo.ID, err = res.LastInsertId()
+	json.NewEncoder(w).Encode(responseMemo)
 	fmt.Fprintf(w, "title: %s, content: %s", memo.Title, memo.Content)
 }
 
