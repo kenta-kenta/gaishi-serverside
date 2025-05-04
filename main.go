@@ -58,7 +58,12 @@ func createMemo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(responseMemo)
+	if err := json.NewEncoder(w).Encode(responseMemo); err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "encode err: %v", err)
+		return
+	}
 }
 
 func getMemo(w http.ResponseWriter, r *http.Request) {
@@ -68,15 +73,40 @@ func getMemo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(path)
 	fmt.Println(id)
 
-	memo := struct {
-		Title   string `json:"title"`
-		Content string `json:"content"`
-	}{
-		Title:   "Sample Title",
-		Content: "Sample Content",
+	var memo struct {
+		ID        int64  `json:"id"`
+		Title     string `json:"title"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
 	}
 
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "db open err: %v", err)
+		return
+	}
+	const sqlStr = "SELECT * FROM memos WHERE id = $1"
+	err = db.QueryRow(sqlStr, id).Scan(&memo.ID, &memo.Title, &memo.Content, &memo.CreatedAt, &memo.UpdatedAt)
+	if err == sql.ErrNoRows {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "memo not found")
+		return
+	} else if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "db exec err: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(memo); err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "encode err: %v", err)
 		return
 	}
