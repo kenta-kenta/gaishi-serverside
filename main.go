@@ -123,10 +123,43 @@ func updateMemo(w http.ResponseWriter, r *http.Request) {
 		Title   string `json:"title"`
 		Content string `json:"content"`
 	}
+	var responseMemo struct {
+		ID        int64  `json:"id"`
+		Title     string `json:"title"`
+		Content   string `json:"content"`
+		CreatedAt string `json:"createdAt"`
+		UpdatedAt string `json:"updatedAt"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&memo); err != nil {
 		fmt.Fprintf(w, "decode err: %v", err)
 	}
-	fmt.Fprintf(w, "title: %s, content: %s", memo.Title, memo.Content)
+	const sqlStr = "UPDATE memos SET title = $1, content = $2 WHERE id = $3 RETURNING id, title, content, created_at, updated_at"
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "db open err: %v", err)
+		return
+	}
+
+	err = db.QueryRow(sqlStr, memo.Title, memo.Content, id).Scan(&responseMemo.ID, &responseMemo.Title, &responseMemo.Content, &responseMemo.CreatedAt, &responseMemo.UpdatedAt)
+	if err == sql.ErrNoRows {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "memo not found")
+		return
+	} else if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "db exec err: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(responseMemo); err != nil {
+		fmt.Fprintf(w, "encode err: %v", err)
+		return
+	}
 }
 
 func deleteMemo(w http.ResponseWriter, r *http.Request) {
