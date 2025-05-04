@@ -43,18 +43,22 @@ func createMemo(w http.ResponseWriter, r *http.Request) {
 	// データベースに保存
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "db open err: %v", err)
 		return
 	}
-	const sqlStr = "INSERT INTO memos(title, content) VALUES ($1, $2)"
-	res, err := db.Exec(sqlStr, memo.Title, memo.Content)
+	const sqlStr = "INSERT INTO memos(title, content) VALUES ($1, $2) RETURNING id, title, content, created_at, updated_at"
+	err = db.QueryRow(sqlStr, memo.Title, memo.Content).Scan(&responseMemo.ID, &responseMemo.Title, &responseMemo.Content, &responseMemo.CreatedAt, &responseMemo.UpdatedAt)
 	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "db exec err: %v", err)
 		return
 	}
-	responseMemo.ID, err = res.LastInsertId()
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(responseMemo)
-	fmt.Fprintf(w, "title: %s, content: %s", memo.Title, memo.Content)
 }
 
 func getMemo(w http.ResponseWriter, r *http.Request) {
