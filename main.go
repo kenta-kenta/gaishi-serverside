@@ -169,6 +169,28 @@ func deleteMemo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(path)
 	fmt.Println(id)
 
+	const sqlStr = "DELETE FROM memos WHERE id = $1"
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "db open err: %v", err)
+		return
+	}
+	result, err := db.Exec(sqlStr, id)
+	if aff, _ := result.RowsAffected(); aff == 0 {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "memo not found")
+		return
+	} else if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		fmt.Fprintf(w, "db exec err: %v", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusNoContent)
 	fmt.Fprintf(w, "delete")
 }
 
