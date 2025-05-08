@@ -9,21 +9,20 @@ import (
 
 	"github.com/kenta-kenta/gaishi-serverside/models"
 	"github.com/kenta-kenta/gaishi-serverside/services"
-	"github.com/kenta-kenta/gaishi-serverside/repositories"
 )
 
 func Hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Hello, World")
 }
 
-func CreateMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repository) {
+func CreateMemo(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateMemoRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, fmt.Sprintf("decode err: %v", err), http.StatusBadRequest)
 		return
 	}
 
-	memo, err := services.CreateMemo(repo, req)
+	memo, err := services.CreateMemo(req)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("service err: %v", err), http.StatusInternalServerError)
 		return
@@ -37,7 +36,7 @@ func CreateMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repos
 	}
 }
 
-func GetMemoByID(w http.ResponseWriter, r *http.Request, repo *repositories.Repository) {
+func GetMemoByID(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
@@ -50,7 +49,7 @@ func GetMemoByID(w http.ResponseWriter, r *http.Request, repo *repositories.Repo
 		return
 	}
 
-	memo, err := services.GetMemoByID(repo, id)
+	memo, err := services.GetMemoByID(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("service err: %v", err), http.StatusInternalServerError)
 		return
@@ -67,7 +66,7 @@ func GetMemoByID(w http.ResponseWriter, r *http.Request, repo *repositories.Repo
 	}
 }
 
-func UpdateMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repository) {
+func UpdateMemo(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
@@ -86,7 +85,7 @@ func UpdateMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repos
 		return
 	}
 
-	memo, err := services.UpdateMemo(repo, id, req)
+	memo, err := services.UpdateMemo(id, req)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("service err: %v", err), http.StatusInternalServerError)
 		return
@@ -103,7 +102,7 @@ func UpdateMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repos
 	}
 }
 
-func DeleteMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repository) {
+func DeleteMemo(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
@@ -116,7 +115,7 @@ func DeleteMemo(w http.ResponseWriter, r *http.Request, repo *repositories.Repos
 		return
 	}
 
-	if err := services.DeleteMemo(repo, id); err != nil {
+	if err := services.DeleteMemo(id); err != nil {
 		http.Error(w, fmt.Sprintf("service err: %v", err), http.StatusInternalServerError)
 		return
 	}

@@ -5,18 +5,18 @@ import (
 	"github.com/kenta-kenta/gaishi-serverside/repositories"
 )
 
-func CreateMemo(repo *repositories.Repository, req models.CreateMemoRequest) (*models.Memo, error) {
-	return repo.CreateMemo(req)
+func CreateMemo(req models.CreateMemoRequest) (*models.Memo, error) {
+	return repositories.CreateMemo(req)
 }
 
-func GetMemoByID(repo *repositories.Repository, id int) (*models.Memo, error) {
-	return repo.GetMemoByID(id)
+func GetMemoByID(id int) (*models.Memo, error) {
+	return repositories.GetMemoByID(id)
 }
 
-func UpdateMemo(repo *repositories.Repository, id int, req models.UpdateMemoRequest) (*models.Memo, error) {
-	return repo.UpdateMemo(id, req)
+func UpdateMemo(id int, req models.UpdateMemoRequest) (*models.Memo, error) {
+	return repositories.UpdateMemo(id, req)
 }
 
-func DeleteMemo(repo *repositories.Repository, id int) error {
-	return repo.DeleteMemo(id)
-} 
+func DeleteMemo(id int) error {
+	return repositories.DeleteMemo(id)
+}
